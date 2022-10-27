@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapp</title>
+</head>
+<link rel="stylesheet" href="./style.css">
+
+<link rel="icon" type="image/x-icon" href="/money.png">
+
+<body>
+    <h1>Basic dApp build using ether.js</h1>
+
+    <p>This dApp has simple implementation to get, set the account balance</p>
+    <div>
+        <label for="balance">Enter balance in denomination of 1ETH</label>
+        <input type="number" id="balance">
+        <button onclick="setBalance()" id="setbalance">Set Balance</button>
+    </div>
+    <hr>
+    <div>
+        <button onclick="increment()" id="increment">Increment</button>
+        <label for="increment">Increment by 1ETH</label>
+    </div>
+    <hr>
+    <div>
+        <button onclick="decrement()" id="decrement">Decrement</button>
+        <label for="decrement">Decrement by 1ETH</label>
+    </div>
+    <hr>
+    <div>
+        <button onclick="getBalance()" id="getBalance">Show balance</button>
+        <label for="getBalance">Get Balance</label>
+    </div>
+</body>
+</html>
+
+<script
+  src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+  type="application/javascript"
+></script>
+
+<script>
+ 
+ const balanceContractAddress = "0x1fe98Fe9235a2d172afeD0455Ec652DC35150385";
+  const balanceContractABI = [
+	{
+		"inputs": [],
+		"name": "decrement",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "increment",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "_num",
+				"type": "uint8"
+			}
+		],
+		"name": "setBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+  let balanceContract;
+  let signer;
+   
+  const provider = new ethers.providers.Web3Provider(window.ethereum, "goerli");
+
+  provider.send("eth_requestAccounts", []).then(() => {
+  provider.listAccounts().then((accounts) => {
+    signer = provider.getSigner(accounts[0]);
+    balanceContract = new ethers.Contract(
+      balanceContractAddress,
+      balanceContractABI,
+      signer
+    );
+  });
+});
+
+
+    async function getBalance(){
+        getBalancePromise=balanceContract.getBalance();
+        var balance=await getBalancePromise;
+        console.log(balance);
+    }
+    async function increment(){
+        incrementPromise=balanceContract.increment();
+        var balance=await incrementPromise;
+        console.log("balance after incrementing is ",balance);
+    }
+    async function decrement(){
+        decrementPromise=balanceContract.decrement();
+        var balance=await decrementPromise;
+        console.log("balance after decrementing is ",balance);
+    }
+    async function setBalance(){
+        balance=document.getElementById('balance').value;
+        setBalancePromise=balanceContract.setBalance(balance);
+        await setBalancePromise;
+    }
+</script>
